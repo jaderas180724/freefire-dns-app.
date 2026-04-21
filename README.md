@@ -1,0 +1,1 @@
+# freefire-dns-app.
