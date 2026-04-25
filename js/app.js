@@ -16,6 +16,15 @@ const FIREBASE_CONFIG = {
 };
 
 // ============================================
+// Utilities
+// ============================================
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ============================================
 // Global State
 // ============================================
 const state = {
@@ -590,6 +599,13 @@ function stopProjectionStream() {
   if (video) video.srcObject = null;
   const statusEl = document.getElementById('proj-status');
   statusEl?.classList.remove('active');
+
+  if (state.projRenderer) {
+    state.projRenderer.dispose();
+    state.projRenderer = null;
+  }
+  state.projScene = null;
+  state.projCamera = null;
 }
 
 function initProjectionRenderer() {
@@ -835,7 +851,7 @@ function showToast(message, type = 'info') {
   toast.className = `toast ${type}`;
   toast.innerHTML = `
     <span class="material-icons-round">${icons[type] || 'info'}</span>
-    <span>${message}</span>
+    <span>${escapeHTML(message)}</span>
   `;
   container.appendChild(toast);
 
@@ -906,11 +922,16 @@ function createModelCard(model) {
   card.className = 'model-card';
   card.dataset.modelId = model.id;
 
+  const safeName = escapeHTML(model.name);
+  const safeFormat = escapeHTML(model.format || 'glb');
+  const safeUrl = model.modelUrl ? escapeHTML(model.modelUrl) : '';
+  const safeId = escapeHTML(model.id);
+
   card.innerHTML = `
     <div class="model-card-thumb">
-      ${model.modelUrl ?
+      ${safeUrl ?
         `<model-viewer
-          src="${model.modelUrl}"
+          src="${safeUrl}"
           auto-rotate
           camera-controls
           interaction-prompt="none"
@@ -920,14 +941,14 @@ function createModelCard(model) {
       }
     </div>
     <div class="model-card-info">
-      <h4>${model.name}</h4>
-      <p>.${model.format || 'glb'} model</p>
+      <h4>${safeName}</h4>
+      <p>.${safeFormat} model</p>
     </div>
     <div class="model-card-actions">
-      <button class="btn-ar-small" data-action="ar" data-model-id="${model.id}">
+      <button class="btn-ar-small" data-action="ar" data-model-id="${safeId}">
         <span class="material-icons-round">view_in_ar</span> AR
       </button>
-      <button class="btn-qr-small" data-action="qr" data-model-id="${model.id}">
+      <button class="btn-qr-small" data-action="qr" data-model-id="${safeId}">
         <span class="material-icons-round">qr_code_2</span> QR
       </button>
     </div>
@@ -972,8 +993,8 @@ function updateModelDrawer() {
         <span class="material-icons-round">view_in_ar</span>
       </div>
       <div class="drawer-item-info">
-        <h4>${model.name}</h4>
-        <p>${model.description || '.glb model'}</p>
+        <h4>${escapeHTML(model.name)}</h4>
+        <p>${escapeHTML(model.description || '.glb model')}</p>
       </div>
     `;
     item.addEventListener('click', () => {
@@ -1046,8 +1067,9 @@ function closeAllDrawers() {
 // Capture Screenshot
 // ============================================
 function captureARScreenshot() {
-  const video = document.getElementById('ar-video') || document.getElementById('proj-video');
-  const canvas3d = document.getElementById('ar-canvas') || document.getElementById('proj-canvas');
+  const isProjection = state.currentView === 'projection';
+  const video = document.getElementById(isProjection ? 'proj-video' : 'ar-video');
+  const canvas3d = document.getElementById(isProjection ? 'proj-canvas' : 'ar-canvas');
   if (!video) return;
 
   const captureCanvas = document.createElement('canvas');
