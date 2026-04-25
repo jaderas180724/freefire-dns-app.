@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+  namespace: devflow-labs
+  labels:
+    app: kong
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+        - name: kong
+          image: kong:3.6
+          ports:
+            - containerPort: 8000
+              name: proxy
+            - containerPort: 8001
+              name: admin
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: /etc/kong/kong.yml
+            - name: KONG_PROXY_LISTEN
+              value: "0.0.0.0:8000"
+            - name: KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8001"
+          volumeMounts:
+            - name: kong-config
+              mountPath: /etc/kong
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+          readinessProbe:
+            exec:
+              command: ["kong", "health"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: kong-config
+          configMap:
+            name: kong-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: devflow-labs
+data:
+  kong.yml: |
+    _format_version: "3.0"
+    services:
+      - name: config-service
+        url: http://config-service:3001
+        routes:
+          - name: config-api
+            paths: ["/api/v1"]
+            strip_path: false
+      - name: proxy-interceptor
+        url: http://proxy-interceptor:8080
+        routes:
+          - name: proxy-route
+            hosts: ["*.devflowlabs.io"]
+      - name: frontend
+        url: http://frontend:3000
+        routes:
+          - name: frontend-route
+            paths: ["/"]
+            strip_path: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong
+  namespace: devflow-labs
+spec:
+  type: LoadBalancer
+  selector:
+    app: kong
+  ports:
+    - name: proxy
+      port: 80
+      targetPort: 8000
+    - name: proxy-ssl
+      port: 443
+      targetPort: 8443

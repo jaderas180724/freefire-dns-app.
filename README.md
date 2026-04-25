@@ -1,137 +1,288 @@
-# HoloView AR - Holographic Visualization PWA
+# DevFlow Labs
 
-Progressive Web App for holographic augmented reality visualization. View, manage, and interact with 3D holograms in real-time AR experiences.
+<div align="center">
 
-## Features
+![DevFlow Labs](https://img.shields.io/badge/DevFlow_Labs-Enterprise_SaaS-blue?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 
-### 1. Progressive Web App (PWA)
-- Installable on any device (iOS, Android, Desktop)
-- Offline-capable with service worker caching
-- Responsive design optimized for iPhone 8 Plus (A11 Bionic) and all modern devices
-- Targets 60fps rendering performance
+**Enterprise-grade SaaS platform for real-time API response interception and A/B testing on mobile applications**
 
-### 2. User Profile System
-- Email/password and Google authentication via Firebase
-- Unique `profile_id` for each user
-- Cloud-synced user data and preferences
-- Demo mode available without Firebase configuration
+</div>
 
-### 3. 3D Model Library
-- Upload and manage `.glb` and `.usdz` 3D models
-- Cloud storage via Firebase Storage
-- Interactive 3D model previews using `<model-viewer>`
-- Drag-and-drop upload with progress tracking
+---
 
-### 4. AR Viewer Engine
-- Real-time camera feed with 3D hologram overlay
-- Three.js-based rendering with holographic effects
-- Model auto-scaling and centering
-- Ambient and directional lighting for realistic rendering
-- Screenshot capture functionality
+## Architecture Overview
 
-### 5. Projection Mode
-- Point device camera at a game screen (Free Fire, etc.)
-- Overlay 3D holograms on the captured view
-- Floating animation effects for immersive experience
-- Opacity controls for blending
+DevFlow Labs uses a microservices architecture designed for high performance and scalability:
 
-### 6. QR Code System
-- Auto-generated QR codes for each hologram
-- Camera-based QR scanning using BarcodeDetector API
-- Scan a QR code to instantly activate a hologram in AR
-
-### 7. Intuitive UI
-- Dark holographic theme design
-- Bottom navigation for mobile devices
-- Model selector drawer in AR mode
-- Toast notifications for user feedback
-- Modal-based detail views with 3D preview
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Kong API Gateway                       │
+│                   (Routing, Auth, Rate Limiting)            │
+├────────────┬──────────────────┬──────────────────────────────┤
+│            │                  │                              │
+│  ┌─────────▼──────┐  ┌───────▼────────┐  ┌────────────────┐│
+│  │   Frontend     │  │ Config Service  │  │    Proxy       ││
+│  │  (Next.js)     │  │ (Node.js/TS)   │  │  Interceptor   ││
+│  │  Port: 3000    │  │  Port: 3001    │  │    (Go)        ││
+│  └────────────────┘  └───────┬────────┘  │  Port: 8080    ││
+│                              │           └───────┬────────┘│
+│                     ┌────────▼────────┐          │         │
+│                     │   PostgreSQL    │◄─────────┘         │
+│                     │   Port: 5432    │                    │
+│                     └─────────────────┘                    │
+│                     ┌─────────────────┐                    │
+│                     │     Redis       │                    │
+│                     │   Port: 6379    │                    │
+│                     └─────────────────┘                    │
+├────────────────────────────────────────────────────────────┤
+│  Monitoring: Prometheus │ Grafana │ Loki                   │
+└────────────────────────────────────────────────────────────┘
+```
 
 ## Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| HTML5 / CSS3 / ES6+ | Core web standards |
-| Firebase Auth | User authentication |
-| Cloud Firestore | User profiles & model metadata |
-| Firebase Storage | 3D model file storage |
-| Three.js | 3D rendering engine |
-| GLTFLoader | `.glb` / `.gltf` model loading |
-| `<model-viewer>` | 3D model previews & AR Quick Look |
-| QRCode.js | QR code generation |
-| BarcodeDetector API | QR code scanning |
-| Service Worker | Offline caching & PWA support |
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **Frontend** | Next.js 14, React, Tailwind CSS, Shadcn/ui, Monaco Editor | SSR Dashboard with dark theme |
+| **Config Service** | Node.js, Fastify, TypeScript, PostgreSQL | User/project management, config API |
+| **Proxy Interceptor** | Go, gjson/sjson | High-performance API response modification |
+| **API Gateway** | Kong 3.6 | Routing, authentication, rate limiting |
+| **Cache** | Redis 7 | Configuration caching, session store |
+| **Database** | PostgreSQL 16 | Primary data store |
+| **Monitoring** | Prometheus, Grafana 10.4 | Metrics collection & visualization |
+| **Logging** | Loki 2.9 | Centralized log aggregation |
+| **Orchestration** | Kubernetes (K8s), Docker Compose | Container orchestration |
+| **CI/CD** | GitHub Actions | Automated build, test, deploy |
 
-## Getting Started
+## Quick Start
 
-### Quick Start (Demo Mode)
-1. Serve the files with any static HTTP server:
-   ```bash
-   npx serve .
-   # or
-   python3 -m http.server 8080
-   ```
-2. Open `http://localhost:8080` in your browser
-3. Click "Sign In" or "Sign Up" to enter demo mode
-4. Explore the AR Viewer, Library, QR Scanner, and Projection Mode
+### Prerequisites
 
-### With Firebase (Production)
-1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-2. Enable Authentication (Email/Password + Google)
-3. Create a Firestore database
-4. Enable Firebase Storage
-5. Update `FIREBASE_CONFIG` in `js/app.js` with your project credentials
-6. Deploy to Firebase Hosting or any static hosting
+- Docker & Docker Compose v2+
+- Node.js 20+ (for local development)
+- Go 1.22+ (for local development)
 
-### Deploy to Firebase Hosting
+### One-Command Deploy (Local)
+
 ```bash
-npm install -g firebase-tools
-firebase login
-firebase init hosting
-firebase deploy
+# Clone the repository
+git clone https://github.com/your-org/devflow-labs.git
+cd devflow-labs
+
+# Start all services
+make up
+
+# Or with docker compose directly
+docker compose up -d
+```
+
+### Access Points
+
+| Service | URL |
+|---------|-----|
+| **Dashboard** | http://localhost:3000 |
+| **API Gateway** | http://localhost:8000 |
+| **Config Service** | http://localhost:3001 |
+| **Proxy Interceptor** | http://localhost:8080 |
+| **Kong Admin** | http://localhost:8001 |
+| **Grafana** | http://localhost:3002 (admin/devflow_grafana) |
+| **Prometheus** | http://localhost:9090 |
+
+### Configure Kong Routes
+
+```bash
+make kong-setup
+```
+
+## Features
+
+### Dashboard
+- **OAuth 2.0 Authentication** — Google & GitHub OAuth + JWT-based email/password
+- **Project Management** — Create and manage multiple interception projects
+- **Monaco Editor** — VS Code-quality JSON editor with syntax highlighting & validation
+- **Target Key Management** — Dynamic CRUD for JSON path keys per project
+- **Injection History** — Track all injection values with one-click restore
+- **Master Switch** — Global on/off toggle per project with visual indicators
+
+### Proxy Interceptor
+- **Subdomain-based Routing** — Each project gets a unique proxy subdomain
+- **JSON Response Modification** — Real-time key replacement using gjson/sjson
+- **In-Memory Caching** — Configurable TTL cache for project configurations
+- **Prometheus Metrics** — Request rates, latency histograms, modification counts
+- **Async Request Logging** — Non-blocking log persistence
+
+### iOS Configuration Profiles
+- **Dynamic .mobileconfig Generation** — Per-project proxy configuration
+- **PAC Script Injection** — Automatic proxy routing via PAC files
+- **One-Click Download** — Serve profiles directly from the backend
+
+### Monitoring
+- **Grafana Dashboards** — Pre-configured dashboards for proxy metrics
+- **Prometheus Scraping** — Auto-discovery of service metrics
+- **Loki Log Aggregation** — Centralized logging with Grafana integration
+
+## Development
+
+### Local Development (Individual Services)
+
+```bash
+# Frontend
+make dev-frontend
+
+# Config Service
+make dev-config
+
+# Proxy Interceptor
+make dev-proxy
+```
+
+### Running Tests
+
+```bash
+# All tests
+make test
+
+# Individual services
+make test-config
+make test-proxy
+make test-frontend
+```
+
+### Linting
+
+```bash
+make lint
+```
+
+## Kubernetes Deployment
+
+### Apply All Manifests
+
+```bash
+make k8s-apply
+```
+
+### Manual Deployment
+
+```bash
+# Create namespace and base services
+kubectl apply -f infrastructure/kubernetes/base/
+
+# Deploy monitoring stack
+kubectl apply -f infrastructure/kubernetes/monitoring/
+
+# Deploy API gateway
+kubectl apply -f infrastructure/kubernetes/gateway/
+```
+
+### Auto-Scaling
+
+The Proxy Interceptor and Config Service are configured with Horizontal Pod Autoscalers:
+
+- **Proxy Interceptor**: 3-20 replicas, scales at 60% CPU
+- **Config Service**: 2-10 replicas, scales at 70% CPU / 80% memory
+
+## CI/CD Pipeline
+
+GitHub Actions workflows handle:
+
+1. **CI Pipeline** (`ci.yml`)
+   - Lint, build, and test all services in parallel
+   - Build and push Docker images to GHCR
+   - Validate Kubernetes manifests
+
+2. **Deploy Pipeline** (`deploy.yml`)
+   - Triggered on push to `main` or manual dispatch
+   - Supports staging/production environments
+   - Rolling updates with health verification
+
+## API Reference
+
+### Authentication
+
+```
+POST /api/v1/auth/register   — Create account
+POST /api/v1/auth/login      — Login with email/password
+POST /api/v1/auth/oauth/callback — OAuth callback
+GET  /api/v1/auth/me          — Get current user
+```
+
+### Projects
+
+```
+GET    /api/v1/projects           — List projects
+POST   /api/v1/projects           — Create project
+GET    /api/v1/projects/:id       — Get project details
+PUT    /api/v1/projects/:id       — Update project
+DELETE /api/v1/projects/:id       — Delete project
+POST   /api/v1/projects/:id/keys  — Add target key
+PUT    /api/v1/projects/:id/keys/:keyId — Update target key
+DELETE /api/v1/projects/:id/keys/:keyId — Delete target key
+```
+
+### Configuration (Internal)
+
+```
+GET  /api/v1/config/proxy/:subdomain — Get project config by subdomain
+POST /api/v1/config/proxy/log        — Log proxy request
+GET  /api/v1/config/logs/:projectId  — Get request logs
+```
+
+### Profiles
+
+```
+GET /api/v1/profiles/ios/:projectId      — Download .mobileconfig
+GET /api/v1/profiles/proxy-info/:projectId — Get proxy info
 ```
 
 ## Project Structure
 
 ```
-/
-├── index.html          # Single-page application entry point
-├── manifest.json       # PWA manifest
-├── sw.js              # Service worker for offline caching
-├── css/
-│   └── main.css       # Complete styling (dark holographic theme)
-├── js/
-│   └── app.js         # Application logic (auth, library, AR, QR)
-├── icons/
-│   ├── icon-72.png    # PWA icons (72-512px)
-│   ├── icon-96.png
-│   ├── icon-128.png
-│   ├── icon-144.png
-│   ├── icon-152.png
-│   ├── icon-192.png
-│   ├── icon-384.png
-│   └── icon-512.png
+devflow-labs/
+├── .github/workflows/       # CI/CD pipelines
+├── frontend/                 # Next.js dashboard
+│   ├── src/
+│   │   ├── app/              # Next.js app router
+│   │   ├── components/       # React components (Shadcn/ui)
+│   │   └── lib/              # Utilities
+│   ├── Dockerfile
+│   └── package.json
+├── services/
+│   ├── config-service/       # Node.js/TypeScript API
+│   │   ├── src/
+│   │   │   ├── routes/       # Fastify route handlers
+│   │   │   ├── middleware/   # Auth, metrics, error handling
+│   │   │   ├── models/       # Database schema & migrations
+│   │   │   └── utils/        # DB, Redis, logging utilities
+│   │   ├── Dockerfile
+│   │   └── package.json
+│   └── proxy-interceptor/    # Go proxy service
+│       ├── cmd/proxy/        # Entry point
+│       ├── internal/
+│       │   ├── handler/      # HTTP handlers
+│       │   ├── config/       # Configuration
+│       │   └── modifier/     # JSON modification engine
+│       ├── Dockerfile
+│       └── go.mod
+├── infrastructure/
+│   ├── kong/                 # API Gateway configuration
+│   ├── kubernetes/           # K8s manifests
+│   │   ├── base/             # Core services
+│   │   ├── monitoring/       # Prometheus, Grafana, Loki
+│   │   └── gateway/          # Kong deployment
+│   └── monitoring/           # Monitoring configs
+│       ├── prometheus/
+│       ├── grafana/
+│       └── loki/
+├── docker-compose.yml        # Local development stack
+├── Makefile                  # Build & deployment commands
 └── README.md
 ```
 
-## Device Compatibility
-
-| Device | Browser | Status |
-|---|---|---|
-| iPhone 8 Plus | Safari | Optimized (A11 Bionic) |
-| iPhone 12+ | Safari | Full support |
-| Android | Chrome | Full support |
-| iPad | Safari | Full support |
-| Desktop | Chrome/Firefox/Edge | Full support |
-
-## Browser APIs Used
-
-- **MediaDevices** (`getUserMedia`): Camera access for AR and QR scanning
-- **DeviceOrientation**: Motion sensor data for AR tracking
-- **BarcodeDetector**: Native QR code detection
-- **Service Worker**: Offline caching and PWA install
-- **WebGL**: Hardware-accelerated 3D rendering via Three.js
-
 ## License
 
-MIT
+MIT License — see [LICENSE](LICENSE) for details.
