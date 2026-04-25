@@ -25,11 +25,11 @@ export const metricsPlugin: FastifyPluginCallback = (
   done
 ) => {
   fastify.addHook('onRequest', async (request) => {
-    (request as Record<string, unknown>).__startTime = process.hrtime.bigint();
+    (request as unknown as Record<string, unknown>).__startTime = process.hrtime.bigint();
   });
 
   fastify.addHook('onResponse', async (request, reply) => {
-    const startTime = (request as Record<string, unknown>).__startTime as bigint;
+    const startTime = (request as unknown as Record<string, unknown>).__startTime as bigint;
     if (startTime) {
       const duration =
         Number(process.hrtime.bigint() - startTime) / 1_000_000_000;

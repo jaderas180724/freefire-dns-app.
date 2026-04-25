@@ -55,7 +55,7 @@ async function start() {
     await app.listen({ port: PORT, host: HOST });
     logger.info(`Config Service running on ${HOST}:${PORT}`);
   } catch (err) {
-    logger.error('Failed to start server:', err);
+    logger.error({ err }, 'Failed to start server');
     process.exit(1);
   }
 }
