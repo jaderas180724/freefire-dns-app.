@@ -212,6 +212,15 @@
           <h3>Projection Mode</h3>
           <p>Project holograms over your game screen</p>
         </div>
+
+        <!-- Security Lab Card -->
+        <div class="dash-card" data-navigate="security">
+          <div class="card-icon security-gradient">
+            <span class="material-icons-round">shield</span>
+          </div>
+          <h3>Security Lab</h3>
+          <p>Aprende sobre seguridad movil y sandboxing</p>
+        </div>
       </div>
 
       <!-- Quick Stats -->
@@ -424,6 +433,252 @@
       </div>
     </section>
 
+    <!-- ==================== SECURITY LAB VIEW ==================== -->
+    <section id="view-security" class="view hidden">
+      <div class="view-header">
+        <button class="btn-back" data-navigate="dashboard">
+          <span class="material-icons-round">arrow_back</span>
+        </button>
+        <h2>Security Lab</h2>
+      </div>
+
+      <div class="security-intro">
+        <div class="security-intro-icon">
+          <span class="material-icons-round">shield</span>
+        </div>
+        <h3>Seguridad en Dispositivos Moviles</h3>
+        <p>Explora por que una pagina web o DNS no puede inyectar codigo en aplicaciones como Free Fire</p>
+      </div>
+
+      <!-- Module 1: Sandboxing -->
+      <div class="security-module" id="module-sandbox">
+        <div class="module-header">
+          <div class="module-number">01</div>
+          <div class="module-title-group">
+            <h3>Aislamiento de Procesos</h3>
+            <span class="module-tag">Sandboxing</span>
+          </div>
+        </div>
+        <div class="sandbox-visual">
+          <div class="sandbox-os-label">Sistema Operativo (Android / iOS)</div>
+          <div class="sandbox-grid">
+            <div class="sandbox-box app-box" id="sandbox-app1">
+              <div class="sandbox-icon">
+                <span class="material-icons-round">sports_esports</span>
+              </div>
+              <span class="sandbox-label">Free Fire</span>
+              <div class="sandbox-shield">
+                <span class="material-icons-round">lock</span>
+              </div>
+              <div class="sandbox-memory">
+                <span>Memoria Privada</span>
+                <div class="memory-bar"><div class="memory-fill" style="width:65%"></div></div>
+              </div>
+            </div>
+            <div class="sandbox-box web-box" id="sandbox-web">
+              <div class="sandbox-icon">
+                <span class="material-icons-round">language</span>
+              </div>
+              <span class="sandbox-label">Pagina Web</span>
+              <div class="sandbox-shield">
+                <span class="material-icons-round">lock</span>
+              </div>
+              <div class="sandbox-memory">
+                <span>Memoria Aislada</span>
+                <div class="memory-bar"><div class="memory-fill web-fill" style="width:30%"></div></div>
+              </div>
+            </div>
+            <div class="sandbox-box app-box" id="sandbox-app2">
+              <div class="sandbox-icon">
+                <span class="material-icons-round">chat</span>
+              </div>
+              <span class="sandbox-label">WhatsApp</span>
+              <div class="sandbox-shield">
+                <span class="material-icons-round">lock</span>
+              </div>
+              <div class="sandbox-memory">
+                <span>Memoria Privada</span>
+                <div class="memory-bar"><div class="memory-fill" style="width:45%"></div></div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-full security-demo-btn" id="btn-sandbox-demo">
+            <span class="material-icons-round">play_arrow</span>
+            Simular Intento de Acceso
+          </button>
+          <div id="sandbox-result" class="security-result hidden">
+            <span class="material-icons-round">gpp_bad</span>
+            <div>
+              <strong>ACCESO DENEGADO</strong>
+              <p>El sistema operativo bloquea cualquier intento de acceso directo a la memoria de otra aplicacion. Cada app vive en su propio sandbox.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 2: DNS Limitations -->
+      <div class="security-module" id="module-dns">
+        <div class="module-header">
+          <div class="module-number">02</div>
+          <div class="module-title-group">
+            <h3>Limitaciones del DNS</h3>
+            <span class="module-tag">Protocolo DNS</span>
+          </div>
+        </div>
+        <div class="dns-visual">
+          <div class="dns-flow">
+            <div class="dns-node dns-client">
+              <span class="material-icons-round">phone_android</span>
+              <span>Tu Dispositivo</span>
+            </div>
+            <div class="dns-arrow" id="dns-arrow-1">
+              <div class="dns-arrow-line"></div>
+              <span class="dns-arrow-label">Consulta DNS</span>
+            </div>
+            <div class="dns-node dns-server">
+              <span class="material-icons-round">dns</span>
+              <span>Servidor DNS</span>
+            </div>
+            <div class="dns-arrow" id="dns-arrow-2">
+              <div class="dns-arrow-line reverse"></div>
+              <span class="dns-arrow-label">Respuesta IP</span>
+            </div>
+            <div class="dns-node dns-ip">
+              <span class="material-icons-round">cloud</span>
+              <span>IP: 142.250.80.46</span>
+            </div>
+          </div>
+          <div class="dns-capabilities">
+            <div class="dns-can">
+              <h4><span class="material-icons-round">check_circle</span> Lo que DNS puede hacer</h4>
+              <ul>
+                <li>Resolver dominios a direcciones IP</li>
+                <li>Redirigir trafico a otro servidor</li>
+                <li>Bloquear dominios especificos</li>
+              </ul>
+            </div>
+            <div class="dns-cannot">
+              <h4><span class="material-icons-round">cancel</span> Lo que DNS NO puede hacer</h4>
+              <ul>
+                <li>Interceptar datos de una app</li>
+                <li>Modificar graficos en tiempo real</li>
+                <li>Inyectar codigo 3D en juegos</li>
+                <li>Controlar la logica de un juego</li>
+              </ul>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-full security-demo-btn" id="btn-dns-demo">
+            <span class="material-icons-round">play_arrow</span>
+            Simular Resolucion DNS
+          </button>
+          <div id="dns-result" class="security-result hidden">
+            <span class="material-icons-round">info</span>
+            <div>
+              <strong>DNS = Solo Resolucion de Nombres</strong>
+              <p>El protocolo DNS unicamente traduce "google.com" a "142.250.80.46". No tiene capacidad para modificar el contenido, graficos o logica de ninguna aplicacion.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 3: Hardware/Software Limitations -->
+      <div class="security-module" id="module-hardware">
+        <div class="module-header">
+          <div class="module-number">03</div>
+          <div class="module-title-group">
+            <h3>Limitaciones de Hardware/Software</h3>
+            <span class="module-tag">Capas de Proteccion</span>
+          </div>
+        </div>
+        <div class="hardware-visual">
+          <div class="layer-stack">
+            <div class="security-layer layer-web" id="layer-web">
+              <div class="layer-content">
+                <span class="material-icons-round">language</span>
+                <div>
+                  <strong>Capa Web (PWA)</strong>
+                  <p>Sin acceso al hardware ni al codigo fuente de apps</p>
+                </div>
+              </div>
+              <div class="layer-access">
+                <span class="access-badge blocked">BLOQUEADO</span>
+              </div>
+            </div>
+            <div class="layer-divider">
+              <span class="material-icons-round">block</span>
+            </div>
+            <div class="security-layer layer-app" id="layer-app">
+              <div class="layer-content">
+                <span class="material-icons-round">apps</span>
+                <div>
+                  <strong>Capa de Aplicacion</strong>
+                  <p>Codigo compilado del juego, protegido por sandbox</p>
+                </div>
+              </div>
+              <div class="layer-access">
+                <span class="access-badge restricted">RESTRINGIDO</span>
+              </div>
+            </div>
+            <div class="layer-divider">
+              <span class="material-icons-round">block</span>
+            </div>
+            <div class="security-layer layer-driver" id="layer-driver">
+              <div class="layer-content">
+                <span class="material-icons-round">memory</span>
+                <div>
+                  <strong>Capa de Driver/GPU</strong>
+                  <p>Acceso directo al hardware grafico (requiere root)</p>
+                </div>
+              </div>
+              <div class="layer-access">
+                <span class="access-badge locked">ROOT REQUERIDO</span>
+              </div>
+            </div>
+            <div class="layer-divider">
+              <span class="material-icons-round">block</span>
+            </div>
+            <div class="security-layer layer-kernel" id="layer-kernel">
+              <div class="layer-content">
+                <span class="material-icons-round">developer_board</span>
+                <div>
+                  <strong>Kernel / Hardware</strong>
+                  <p>Nivel mas bajo: CPU, GPU, memoria fisica</p>
+                </div>
+              </div>
+              <div class="layer-access">
+                <span class="access-badge locked">INACCESIBLE</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-full security-demo-btn" id="btn-hardware-demo">
+            <span class="material-icons-round">play_arrow</span>
+            Simular Intento de Aimbot
+          </button>
+          <div id="hardware-result" class="security-result hidden">
+            <span class="material-icons-round">gpp_bad</span>
+            <div>
+              <strong>IMPOSIBLE DESDE UNA PWA</strong>
+              <p>Un "aimbot" real requiere acceso al codigo fuente del juego o al hardware grafico a nivel de driver. Una aplicacion web no puede atravesar las capas de seguridad del sistema operativo movil.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="security-summary">
+        <div class="summary-icon">
+          <span class="material-icons-round">verified_user</span>
+        </div>
+        <h3>Conclusion</h3>
+        <p>Es tecnicamente imposible que una pagina web, perfil DNS o PWA inyecte un aimbot u otro hack dentro de un juego como Free Fire. Los sistemas operativos moviles tienen multiples capas de seguridad que lo impiden.</p>
+        <div class="summary-tags">
+          <span class="summary-tag"><span class="material-icons-round">shield</span> Sandbox</span>
+          <span class="summary-tag"><span class="material-icons-round">dns</span> DNS Seguro</span>
+          <span class="summary-tag"><span class="material-icons-round">lock</span> Capas HW/SW</span>
+        </div>
+      </div>
+    </section>
+
     <!-- ==================== PROFILE VIEW ==================== -->
     <section id="view-profile" class="view hidden">
       <div class="view-header">
@@ -527,6 +782,10 @@
       <button class="bottom-nav-item" data-navigate="qr-scanner">
         <span class="material-icons-round">qr_code_scanner</span>
         <span>QR</span>
+      </button>
+      <button class="bottom-nav-item" data-navigate="security">
+        <span class="material-icons-round">shield</span>
+        <span>Security</span>
       </button>
     </nav>
   </div>

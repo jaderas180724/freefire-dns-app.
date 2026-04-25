@@ -805,7 +805,8 @@ function showView(viewName) {
     'ar-viewer': 'view-ar',
     'qr-scanner': 'view-qr',
     'projection': 'view-projection',
-    'profile': 'view-profile'
+    'profile': 'view-profile',
+    'security': 'view-security'
   };
 
   // Stop streams when leaving views
@@ -1313,6 +1314,11 @@ function setupEventListeners() {
     }
   });
 
+  // Security Lab demos
+  document.getElementById('btn-sandbox-demo')?.addEventListener('click', runSandboxDemo);
+  document.getElementById('btn-dns-demo')?.addEventListener('click', runDNSDemo);
+  document.getElementById('btn-hardware-demo')?.addEventListener('click', runHardwareDemo);
+
   // Close modals on backdrop click
   document.querySelectorAll('.modal').forEach((modal) => {
     modal.addEventListener('click', (e) => {
@@ -1389,6 +1395,129 @@ function placeHologramInProjection(model) {
       }
     );
   }
+}
+
+// ============================================
+// Security Lab Demos
+// ============================================
+function runSandboxDemo() {
+  const webBox = document.getElementById('sandbox-web');
+  const app1 = document.getElementById('sandbox-app1');
+  const app2 = document.getElementById('sandbox-app2');
+  const result = document.getElementById('sandbox-result');
+  const btn = document.getElementById('btn-sandbox-demo');
+
+  if (!webBox || !app1) return;
+
+  btn.disabled = true;
+  result.classList.add('hidden');
+
+  // Reset
+  webBox.classList.remove('attack-source');
+  app1.classList.remove('attack-target');
+  app2.classList.remove('attack-target');
+
+  // Step 1: Highlight web box as attacker
+  setTimeout(() => {
+    webBox.classList.add('attack-source');
+  }, 300);
+
+  // Step 2: Target apps get shield animation
+  setTimeout(() => {
+    app1.classList.add('attack-target');
+    app2.classList.add('attack-target');
+  }, 1000);
+
+  // Step 3: Show result
+  setTimeout(() => {
+    result.classList.remove('hidden');
+    btn.disabled = false;
+  }, 1800);
+}
+
+function runDNSDemo() {
+  const nodes = document.querySelectorAll('.dns-node');
+  const arrows = document.querySelectorAll('.dns-arrow');
+  const result = document.getElementById('dns-result');
+  const btn = document.getElementById('btn-dns-demo');
+
+  if (!result) return;
+
+  btn.disabled = true;
+  result.classList.add('hidden');
+
+  // Reset
+  nodes.forEach((n) => n.classList.remove('active'));
+  arrows.forEach((a) => a.classList.remove('active'));
+
+  // Step 1: Client sends query
+  setTimeout(() => {
+    nodes[0]?.classList.add('active');
+  }, 300);
+
+  // Step 2: Arrow to DNS server
+  setTimeout(() => {
+    arrows[0]?.classList.add('active');
+  }, 700);
+
+  // Step 3: DNS server processes
+  setTimeout(() => {
+    nodes[1]?.classList.add('active');
+  }, 1100);
+
+  // Step 4: Response arrow
+  setTimeout(() => {
+    arrows[1]?.classList.add('active');
+  }, 1500);
+
+  // Step 5: IP resolved
+  setTimeout(() => {
+    nodes[2]?.classList.add('active');
+  }, 1900);
+
+  // Step 6: Show result
+  setTimeout(() => {
+    result.classList.remove('hidden');
+    btn.disabled = false;
+  }, 2400);
+}
+
+function runHardwareDemo() {
+  const layers = ['layer-web', 'layer-app', 'layer-driver', 'layer-kernel'];
+  const result = document.getElementById('hardware-result');
+  const btn = document.getElementById('btn-hardware-demo');
+
+  if (!result) return;
+
+  btn.disabled = true;
+  result.classList.add('hidden');
+
+  // Reset
+  layers.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('highlight', 'blocked-anim');
+    }
+  });
+
+  // Animate through layers top to bottom, each gets blocked
+  layers.forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('highlight');
+        setTimeout(() => {
+          el.classList.add('blocked-anim');
+        }, 200);
+      }
+    }, i * 600);
+  });
+
+  // Show result after all layers
+  setTimeout(() => {
+    result.classList.remove('hidden');
+    btn.disabled = false;
+  }, layers.length * 600 + 400);
 }
 
 function handleResize() {
