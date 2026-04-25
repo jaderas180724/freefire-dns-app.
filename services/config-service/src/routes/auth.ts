@@ -114,7 +114,7 @@ export const authRoutes: FastifyPluginCallback = (
       })
       .parse(request.body);
 
-    let result = await query(
+    const result = await query(
       'SELECT id, email, name FROM users WHERE provider = $1 AND provider_id = $2',
       [body.provider, body.providerId]
     );

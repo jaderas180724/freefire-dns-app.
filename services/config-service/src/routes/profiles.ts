@@ -10,12 +10,6 @@ function generateMobileConfig(
   proxyDomain: string
 ): string {
   const proxyUrl = `${proxySubdomain}.${proxyDomain}`;
-  const pacScript = `
-function FindProxyForURL(url, host) {
-  return "PROXY ${proxyUrl}:8080; DIRECT";
-}`.trim();
-
-  const pacBase64 = Buffer.from(pacScript).toString('base64');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
