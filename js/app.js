@@ -141,7 +141,6 @@ function handleAuthStateChange(user) {
 async function handleLogin(email, password) {
   const FB = window.FirebaseModules;
   if (!window.fbAuth) {
-    // Demo mode
     demoLogin(email);
     return;
   }
@@ -149,7 +148,11 @@ async function handleLogin(email, password) {
     await FB.signInWithEmailAndPassword(window.fbAuth, email, password);
     showToast('Welcome back!', 'success');
   } catch (err) {
-    showToast(getAuthErrorMessage(err.code), 'error');
+    if (isFirebaseConfigError(err)) {
+      demoLogin(email);
+    } else {
+      showToast(getAuthErrorMessage(err.code), 'error');
+    }
   }
 }
 
@@ -172,7 +175,11 @@ async function handleRegister(name, email, password) {
     });
     showToast('Account created! Welcome to HoloView AR', 'success');
   } catch (err) {
-    showToast(getAuthErrorMessage(err.code), 'error');
+    if (isFirebaseConfigError(err)) {
+      demoLogin(email, name);
+    } else {
+      showToast(getAuthErrorMessage(err.code), 'error');
+    }
   }
 }
 
@@ -185,7 +192,6 @@ async function handleGoogleAuth() {
   try {
     const provider = new FB.GoogleAuthProvider();
     const result = await FB.signInWithPopup(window.fbAuth, provider);
-    // Create user doc if new
     const userDoc = await FB.getDoc(FB.doc(window.fbDb, 'users', result.user.uid));
     if (!userDoc.exists()) {
       await FB.setDoc(FB.doc(window.fbDb, 'users', result.user.uid), {
@@ -199,7 +205,9 @@ async function handleGoogleAuth() {
     }
     showToast('Welcome!', 'success');
   } catch (err) {
-    if (err.code !== 'auth/popup-closed-by-user') {
+    if (isFirebaseConfigError(err)) {
+      demoLogin('demo@holoview.ar', 'Demo User');
+    } else if (err.code !== 'auth/popup-closed-by-user') {
       showToast(getAuthErrorMessage(err.code), 'error');
     }
   }
@@ -209,13 +217,16 @@ async function handleLogout() {
   const FB = window.FirebaseModules;
   stopARStream();
   stopProjectionStream();
-  if (window.fbAuth) {
-    await FB.signOut(window.fbAuth);
-  } else {
-    state.user = null;
-    state.models = [];
-    showView('auth');
+  try {
+    if (window.fbAuth) {
+      await FB.signOut(window.fbAuth);
+    }
+  } catch (err) {
+    console.warn('Sign out error:', err);
   }
+  state.user = null;
+  state.models = [];
+  showView('auth');
   showToast('Signed out', 'success');
 }
 
@@ -234,6 +245,19 @@ function demoLogin(email, name) {
   updateDashboardStats();
   showView('dashboard');
   showToast('Welcome! Running in demo mode', 'success');
+}
+
+function isFirebaseConfigError(err) {
+  const configErrors = [
+    'auth/api-key-not-valid',
+    'auth/invalid-api-key',
+    'auth/project-not-found',
+    'auth/configuration-not-found',
+    'auth/network-request-failed'
+  ];
+  return configErrors.includes(err.code) ||
+    (err.message && err.message.includes('invalid')) ||
+    !err.code;
 }
 
 function getAuthErrorMessage(code) {
