@@ -57,21 +57,29 @@ async function initApp() {
 
   const FB = window.FirebaseModules;
 
-  try {
-    const app = FB.initializeApp(FIREBASE_CONFIG);
-    window.fbAuth = FB.getAuth(app);
-    window.fbDb = FB.getFirestore(app);
-    window.fbStorage = FB.getStorage(app);
+  const isPlaceholderConfig = !FIREBASE_CONFIG.apiKey ||
+    FIREBASE_CONFIG.apiKey.includes('DemoKey') ||
+    FIREBASE_CONFIG.apiKey.includes('YOUR_') ||
+    FIREBASE_CONFIG.projectId === 'holoview-ar';
 
-    FB.onAuthStateChanged(window.fbAuth, handleAuthStateChange);
-  } catch (err) {
-    console.warn('Firebase init (demo mode):', err.message);
-    // Run in demo mode without Firebase
+  if (isPlaceholderConfig) {
+    console.info('Placeholder Firebase config detected — running in demo mode');
     window.fbAuth = null;
     window.fbDb = null;
     window.fbStorage = null;
-    hideLoading();
-    showView('auth');
+  } else {
+    try {
+      const app = FB.initializeApp(FIREBASE_CONFIG);
+      window.fbAuth = FB.getAuth(app);
+      window.fbDb = FB.getFirestore(app);
+      window.fbStorage = FB.getStorage(app);
+      FB.onAuthStateChanged(window.fbAuth, handleAuthStateChange);
+    } catch (err) {
+      console.warn('Firebase init failed — running in demo mode:', err.message);
+      window.fbAuth = null;
+      window.fbDb = null;
+      window.fbStorage = null;
+    }
   }
 
   setupEventListeners();
