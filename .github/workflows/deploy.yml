@@ -1,0 +1,70 @@
+name: Deploy to Cloud
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'staging' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: "v1.29.0"
+
+      - name: Set Kubernetes context
+        run: |
+          echo "Configure your cloud provider's kubectl context here"
+          echo "Examples:"
+          echo "  AWS EKS: aws eks update-kubeconfig --name devflow-cluster --region us-east-1"
+          echo "  GCP GKE: gcloud container clusters get-credentials devflow-cluster --zone us-central1"
+          echo "  Azure AKS: az aks get-credentials --resource-group devflow-rg --name devflow-cluster"
+
+      - name: Update image tags
+        run: |
+          TAG=${{ github.sha }}
+          for file in infrastructure/kubernetes/base/config-service.yaml \
+                      infrastructure/kubernetes/base/proxy-interceptor.yaml \
+                      infrastructure/kubernetes/base/frontend.yaml; do
+            sed -i "s|image: devflow-labs/.*:latest|image: ${REGISTRY}/${IMAGE_PREFIX}/$(basename $(dirname $file)):${TAG}|g" "$file" || true
+          done
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f infrastructure/kubernetes/base/namespace.yaml
+          kubectl apply -f infrastructure/kubernetes/base/
+          kubectl apply -f infrastructure/kubernetes/monitoring/
+          kubectl apply -f infrastructure/kubernetes/gateway/
+
+      - name: Wait for deployments
+        run: |
+          kubectl -n devflow-labs rollout status deployment/config-service --timeout=300s
+          kubectl -n devflow-labs rollout status deployment/proxy-interceptor --timeout=300s
+          kubectl -n devflow-labs rollout status deployment/frontend --timeout=300s
+
+      - name: Verify health
+        run: |
+          echo "Deployment complete. Verifying service health..."
+          kubectl -n devflow-labs get pods
+          kubectl -n devflow-labs get services
